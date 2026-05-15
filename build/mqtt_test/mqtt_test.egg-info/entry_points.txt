@@ -1,0 +1,2 @@
+[console_scripts]
+mqtt_pub = mqtt_test.pub_cmd_vel:main

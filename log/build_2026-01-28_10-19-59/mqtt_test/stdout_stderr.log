@@ -1,0 +1,20 @@
+running develop
+running egg_info
+creating mqtt_test.egg-info
+writing mqtt_test.egg-info/PKG-INFO
+writing dependency_links to mqtt_test.egg-info/dependency_links.txt
+writing requirements to mqtt_test.egg-info/requires.txt
+writing top-level names to mqtt_test.egg-info/top_level.txt
+writing manifest file 'mqtt_test.egg-info/SOURCES.txt'
+reading manifest file 'mqtt_test.egg-info/SOURCES.txt'
+writing manifest file 'mqtt_test.egg-info/SOURCES.txt'
+running build_ext
+Creating /home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages/mqtt-test.egg-link (link to .)
+
+Installed /home/parichu/mqtt_test/build/mqtt_test
+running symlink_data
+creating /home/parichu/mqtt_test/install/mqtt_test/share/ament_index
+creating /home/parichu/mqtt_test/install/mqtt_test/share/ament_index/resource_index
+creating /home/parichu/mqtt_test/install/mqtt_test/share/ament_index/resource_index/packages
+symbolically linking /home/parichu/mqtt_test/build/mqtt_test/resource/mqtt_test -> /home/parichu/mqtt_test/install/mqtt_test/share/ament_index/resource_index/packages
+symbolically linking /home/parichu/mqtt_test/build/mqtt_test/package.xml -> /home/parichu/mqtt_test/install/mqtt_test/share/mqtt_test

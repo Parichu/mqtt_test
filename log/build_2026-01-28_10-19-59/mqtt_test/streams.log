@@ -1,0 +1,22 @@
+[1.510s] Invoking command in '/home/parichu/mqtt_test/build/mqtt_test': PYTHONPATH=/home/parichu/mqtt_test/build/mqtt_test/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/parichu/mqtt_test/build/mqtt_test/build --no-deps symlink_data
+[2.073s] running develop
+[2.401s] running egg_info
+[2.401s] creating mqtt_test.egg-info
+[2.433s] writing mqtt_test.egg-info/PKG-INFO
+[2.433s] writing dependency_links to mqtt_test.egg-info/dependency_links.txt
+[2.434s] writing requirements to mqtt_test.egg-info/requires.txt
+[2.434s] writing top-level names to mqtt_test.egg-info/top_level.txt
+[2.434s] writing manifest file 'mqtt_test.egg-info/SOURCES.txt'
+[2.500s] reading manifest file 'mqtt_test.egg-info/SOURCES.txt'
+[2.501s] writing manifest file 'mqtt_test.egg-info/SOURCES.txt'
+[2.536s] running build_ext
+[2.536s] Creating /home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages/mqtt-test.egg-link (link to .)
+[2.537s] 
+[2.537s] Installed /home/parichu/mqtt_test/build/mqtt_test
+[2.537s] running symlink_data
+[2.537s] creating /home/parichu/mqtt_test/install/mqtt_test/share/ament_index
+[2.537s] creating /home/parichu/mqtt_test/install/mqtt_test/share/ament_index/resource_index
+[2.537s] creating /home/parichu/mqtt_test/install/mqtt_test/share/ament_index/resource_index/packages
+[2.537s] symbolically linking /home/parichu/mqtt_test/build/mqtt_test/resource/mqtt_test -> /home/parichu/mqtt_test/install/mqtt_test/share/ament_index/resource_index/packages
+[2.537s] symbolically linking /home/parichu/mqtt_test/build/mqtt_test/package.xml -> /home/parichu/mqtt_test/install/mqtt_test/share/mqtt_test
+[2.591s] Invoked command in '/home/parichu/mqtt_test/build/mqtt_test' returned '0': PYTHONPATH=/home/parichu/mqtt_test/build/mqtt_test/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/parichu/mqtt_test/build/mqtt_test/build --no-deps symlink_data

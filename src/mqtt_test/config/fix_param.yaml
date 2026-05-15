@@ -1,0 +1,21 @@
+amcl:
+  ros__parameters:
+    min_particles: 1000
+    max_particles: 4000
+    # เพิ่มจำนวนอนุภาค (Particles) เพื่อให้การอัปเดตตำแหน่งจาก LiDAR แม่นยำและเกาะแผนที่ได้แน่นขึ้น
+
+controller_server:
+  ros__parameters:
+    GoalChecker:
+      plugin: "nav2_controller::SimpleGoalChecker"
+      xy_goal_tolerance: 0.05 # บังคับให้คลาดเคลื่อนได้ไม่เกิน 5 ซม.
+      yaw_goal_tolerance: 0.10 # บังคับให้คลาดเคลื่อนเชิงมุมได้ไม่เกิน 5.7 องศา
+
+local_costmap:
+  local_costmap:
+    ros__parameters:
+      plugins: ["voxel_layer", "inflation_layer"]
+      inflation_layer:
+        plugin: "nav2_costmap_2d::InflationLayer"
+        inflation_radius: 0.25 # ลดรัศมีลงให้พอดีกับตัวหุ่น (เช่น TurtleBot3 Burger/Waffle)
+        cost_scaling_factor: 5.0 # เพิ่มความชันของ Cost ทำให้หุ่นยนต์รู้ตัวเร็วขึ้นเมื่อเฉียดกำแพง

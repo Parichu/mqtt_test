@@ -1,0 +1,17 @@
+[1.530s] Invoking command in '/home/parichu/mqtt_test/build/mqtt_test': PYTHONPATH=/home/parichu/mqtt_test/build/mqtt_test/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/parichu/mqtt_test/build/mqtt_test/build --no-deps symlink_data
+[2.105s] running develop
+[2.441s] running egg_info
+[2.474s] writing mqtt_test.egg-info/PKG-INFO
+[2.475s] writing dependency_links to mqtt_test.egg-info/dependency_links.txt
+[2.475s] writing entry points to mqtt_test.egg-info/entry_points.txt
+[2.476s] writing requirements to mqtt_test.egg-info/requires.txt
+[2.476s] writing top-level names to mqtt_test.egg-info/top_level.txt
+[2.541s] reading manifest file 'mqtt_test.egg-info/SOURCES.txt'
+[2.543s] writing manifest file 'mqtt_test.egg-info/SOURCES.txt'
+[2.578s] running build_ext
+[2.579s] Creating /home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages/mqtt-test.egg-link (link to .)
+[2.580s] Installing mqtt_pub script to /home/parichu/mqtt_test/install/mqtt_test/lib/mqtt_test
+[2.581s] 
+[2.581s] Installed /home/parichu/mqtt_test/build/mqtt_test
+[2.581s] running symlink_data
+[2.640s] Invoked command in '/home/parichu/mqtt_test/build/mqtt_test' returned '0': PYTHONPATH=/home/parichu/mqtt_test/build/mqtt_test/prefix_override:/usr/lib/python3/dist-packages/colcon_core/task/python/colcon_distutils_commands:/home/parichu/mqtt_test/install/mqtt_test/lib/python3.12/site-packages:${PYTHONPATH} /usr/bin/python3 -W ignore:setup.py install is deprecated -W ignore:easy_install command is deprecated setup.py develop --editable --build-directory /home/parichu/mqtt_test/build/mqtt_test/build --no-deps symlink_data
