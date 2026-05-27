@@ -1,73 +1,116 @@
-import rclpy
-import paho.mqtt.client as mqtt
-import json
-import ssl
-import time
+"""
+pub_cmd_vel Node — Publishes robot pose telemetry to MQTT broker and ROS /fire/goal_pose topic
 
+Published Topics:
+  /goal_xy  (geometry_msgs/Pose)  — Current XY pose estimate
+
+MQTT Published:
+  <mqtt_topic>  JSON: {"Position x": float, "Position y": float, "Time Stamped": int}
+
+Parameters:
+  mqtt_broker    (str,   default: '172.20.10.6')   — MQTT broker hostname or IP
+  mqtt_port      (int,   default: 1883)             — MQTT broker TCP port
+  mqtt_topic     (str,   default: 'robot/nav_goal') — MQTT topic to publish telemetry
+  mqtt_username  (str,   default: 'parichu')        — MQTT username
+  mqtt_password  (str,   default: '1122')           — MQTT password
+  timer_period   (float, default: 1.5)              — Timer interval in seconds
+  goal_x         (float, default: 9.7)              — Target X position (metres)
+  goal_y         (float, default: 5.4)              — Target Y position (metres)
+"""
+
+import json
+
+import paho.mqtt.client as mqtt
+import rclpy
 from rclpy.node import Node
+
 from geometry_msgs.msg import Pose
 
-# MQTT Setup
-broker = "xxx.xxx.x.x"  # Change IP Here
-port = 8084
-topic = "robot/nav_goal"
-username = "parichu"
-password = "1122"
 
-
-# Class control Ros2 cmd_vel Topic
 class ControlCmd(Node):
     def __init__(self):
         super().__init__("send_cmd_vel_with_mqtt")
-        self.publishers_ = self.create_publisher(Pose, "fire/goal_pose", 10)
-        self.timer = self.create_timer(1.5, self.timer_callback)
-        self.pose_x = 0
-        self.pose_y = 0
-        self.time_stamp = 0
-        # MQTT Client Setup
-        self.mqtt_client = mqtt.Client()
-        self.mqtt_client.username_pw_set(username, password)
+
+        self.declare_parameter("mqtt_broker", "172.20.10.6")
+        self.declare_parameter("mqtt_port", 1883)
+        self.declare_parameter("mqtt_topic", "robot/nav_goal")
+        self.declare_parameter("mqtt_username", "parichu")
+        self.declare_parameter("mqtt_password", "1122")
+        self.declare_parameter("timer_period", 1.5)
+        self.declare_parameter("goal_x", 9.7)
+        self.declare_parameter("goal_y", 5.4)
+
+        broker = self.get_parameter("mqtt_broker").get_parameter_value().string_value
+        port = self.get_parameter("mqtt_port").get_parameter_value().integer_value
+        self._topic = (
+            self.get_parameter("mqtt_topic").get_parameter_value().string_value
+        )
+        username = (
+            self.get_parameter("mqtt_username").get_parameter_value().string_value
+        )
+        password = (
+            self.get_parameter("mqtt_password").get_parameter_value().string_value
+        )
+        timer_period = (
+            self.get_parameter("timer_period").get_parameter_value().double_value
+        )
+        self._goal_x = self.get_parameter("goal_x").get_parameter_value().double_value
+        self._goal_y = self.get_parameter("goal_y").get_parameter_value().double_value
+
+        self._publisher = self.create_publisher(Pose, "goal_xy", 10)
+        self._timer = self.create_timer(timer_period, self._timer_callback)
+
+        self._time_stamp = 0
+
+        self._mqtt_client = mqtt.Client()
+        self._mqtt_client.username_pw_set(username, password)
+        self._mqtt_client.on_disconnect = self._on_disconnect
 
         try:
-            self.mqtt_client.connect(broker, port)
-            self.mqtt_client.loop_start()  # Backgroud Start
-            self.get_logger().info("Connect to MQTT Sucess")
+            self._mqtt_client.connect(broker, port)
+            self._mqtt_client.loop_start()
+            self.get_logger().info(f"Connected to MQTT broker at {broker}:{port}")
+        except ConnectionRefusedError:
+            self.get_logger().error(
+                f"Connection refused — broker not reachable at {broker}:{port}. "
+                "Check broker is running and credentials are correct."
+            )
         except Exception as e:
-            self.get_logger().info(f"Can't Connect To MQTT Broker: {e}")
+            self.get_logger().error(f"MQTT connect failed: {e}")
 
-    def timer_callback(self):
-        self.pose_x += 0.1
-        self.pose_y += 0.1
-        self.time_stamp
+    def _timer_callback(self):
+        self._time_stamp += 1
 
-        # Set Angular Velocity (rad/s)
+        # Publish ROS pose
+        pose_msg = Pose()
+        pose_msg.position.x = self._goal_x
+        pose_msg.position.y = self._goal_y
+        self._publisher.publish(pose_msg)
 
-        # Craate Log_data Dictionary
-        log_data = {
-            "Position x": self.pose_x,  # Point in map
-            "Position y": self.pose_y,  # Point in map
-            "Time Stamped ": self.time_stamp,  # Time
+        # Publish MQTT telemetry
+        payload = {
+            "Position x": self._goal_x,
+            "Position y": self._goal_y,
+            "Time Stamped": self._time_stamp,
         }
+        self._mqtt_client.publish(self._topic, json.dumps(payload))
+        self.get_logger().info(f"Published: {payload}")
 
-        # Send data to MQTT
-        self.mqtt_client.publish(topic, json.dumps(log_data))
+    def _on_disconnect(self, client, userdata, rc):
+        if rc != 0:
+            self.get_logger().warn(
+                f"Unexpected MQTT disconnect (rc={rc}), attempting reconnect..."
+            )
 
-        # Display data
-        self.get_logger().info(f"Publish Payload{log_data}")
-        self.spd += 1
-
-        def destroy_node(self):
-            self.mqtt_client.loop_stop()
-            self.mqtt_client.disconnect()
-            super().destroy_node()
+    def destroy_node(self):
+        self._mqtt_client.loop_stop()
+        self._mqtt_client.disconnect()
+        super().destroy_node()
 
 
-# Main func for start program
 def main(args=None):
     rclpy.init(args=args)
-
     node = ControlCmd()
-
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
