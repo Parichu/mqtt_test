@@ -22,6 +22,10 @@ setup(
         ],
     },
     entry_points={
-        "console_scripts": ["mqtt_pub = mqtt_test.pub_cmd_vel:main"],
+        "console_scripts": [
+            "mqtt_pub = mqtt_test.pub_cmd_vel:main",
+            "nav_node = mqtt_test.nav:main",
+            "mq_pub = mqtt_test.mq_pub:main",
+        ],
     },
 )
