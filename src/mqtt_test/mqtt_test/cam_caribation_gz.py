@@ -8,10 +8,10 @@ from geometry_msgs.msg import PoseStamped
 # Replace with the output from Script 1
 image_points = np.array(
     [
-        [0, 1],  # Top-Left
-        [1277, 0],  # Top-Right
-        [0, 718],  # Bottom-Left
-        [1277, 718],  # Bottom-Right
+        [840, 462],  # Top-Left
+        [1194, 434],  # Top-Right
+        [271, 1061],  # Bottom-Left
+        [1449, 1056],  # Bottom-Right
     ],
     dtype=np.float32,
 )
