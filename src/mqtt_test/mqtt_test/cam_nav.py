@@ -20,8 +20,8 @@ from geometry_msgs.msg import PoseStamped
 # Pixel corners of the observable floor area in the camera frame
 image_points = np.array(
     [
-        [262, 432],   # Anchor 1
-        [972, 322],   # Anchor 2
+        [262, 432],  # Anchor 1
+        [972, 322],  # Anchor 2
         [1278, 348],  # Anchor 3
         [1278, 718],  # Anchor 4
     ],
@@ -64,7 +64,7 @@ def main(args=None):
     rclpy.init(args=args)
     node = CamNavNode()
 
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(2)
     if not cap.isOpened():
         node.get_logger().error("Cannot open camera device 0")
         node.destroy_node()
@@ -106,13 +106,26 @@ def main(args=None):
 
         _read_fails = 0
 
-        cv2.putText(frame, "Click to set nav goal  |  Q = quit",
-                    (20, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (0, 255, 0), 2)
+        cv2.putText(
+            frame,
+            "Click to set nav goal  |  Q = quit",
+            (20, 40),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.75,
+            (0, 255, 0),
+            2,
+        )
         if last_goal_px:
             cv2.circle(frame, last_goal_px, 10, (0, 0, 255), -1)
-            cv2.putText(frame, f"Goal: {last_goal_px}",
-                        (last_goal_px[0] + 12, last_goal_px[1] - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
+            cv2.putText(
+                frame,
+                f"Goal: {last_goal_px}",
+                (last_goal_px[0] + 12, last_goal_px[1] - 10),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 0, 255),
+                1,
+            )
         cv2.imshow("Camera Nav", frame)
 
         rclpy.spin_once(node, timeout_sec=0.01)

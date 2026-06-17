@@ -32,7 +32,7 @@ def generate_launch_description():
     nav2_dir = get_package_share_directory("nav2_bringup")
     tb3_dir = get_package_share_directory("nav2_minimal_tb3_sim")
 
-    map_yaml = os.path.join(pkg_share, "config", "mapuse6.yaml")
+    map_yaml = os.path.join(pkg_share, "config", "mapuse28.yaml")
     sim_params_raw = os.path.join(pkg_share, "config", "sim_params.yaml")
     rviz_cfg = os.path.join(nav2_dir, "rviz", "nav2_default_view.rviz")
 
@@ -71,11 +71,13 @@ def generate_launch_description():
         executable="lifecycle_manager",
         name="lifecycle_manager_map",
         output="screen",
-        parameters=[{
-            "use_sim_time": False,
-            "autostart": True,
-            "node_names": ["map_server"],
-        }],
+        parameters=[
+            {
+                "use_sim_time": False,
+                "autostart": True,
+                "node_names": ["map_server"],
+            }
+        ],
     )
 
     # ── Nav2 navigation nodes (collision_monitor excluded) ────────────────────
@@ -150,19 +152,21 @@ def generate_launch_description():
         executable="lifecycle_manager",
         name="lifecycle_manager_navigation",
         output="screen",
-        parameters=[{
-            "use_sim_time": False,
-            "autostart": True,
-            "node_names": [
-                "controller_server",
-                "smoother_server",
-                "planner_server",
-                "behavior_server",
-                "bt_navigator",
-                "waypoint_follower",
-                "velocity_smoother",
-            ],
-        }],
+        parameters=[
+            {
+                "use_sim_time": False,
+                "autostart": True,
+                "node_names": [
+                    "controller_server",
+                    "smoother_server",
+                    "planner_server",
+                    "behavior_server",
+                    "bt_navigator",
+                    "waypoint_follower",
+                    "velocity_smoother",
+                ],
+            }
+        ],
     )
 
     # ── Loopback simulator ────────────────────────────────────────────────────
@@ -191,24 +195,26 @@ def generate_launch_description():
         output="screen",
     )
 
-    return LaunchDescription([
-        declare_use_sim_time,
-        # Infrastructure
-        robot_state_pub,
-        loopback_sim,
-        # Map
-        map_server,
-        map_lifecycle,
-        # Navigation
-        controller,
-        smoother,
-        planner,
-        behaviors,
-        bt_navigator,
-        waypoint_follower,
-        velocity_smoother,
-        nav_lifecycle,
-        # UI — RViz2 only; run camera node separately:
-        #   ros2 run mqtt_test click_nav
-        rviz2,
-    ])
+    return LaunchDescription(
+        [
+            declare_use_sim_time,
+            # Infrastructure
+            robot_state_pub,
+            loopback_sim,
+            # Map
+            map_server,
+            map_lifecycle,
+            # Navigation
+            controller,
+            smoother,
+            planner,
+            behaviors,
+            bt_navigator,
+            waypoint_follower,
+            velocity_smoother,
+            nav_lifecycle,
+            # UI — RViz2 only; run camera node separately:
+            #   ros2 run mqtt_test click_nav
+            rviz2,
+        ]
+    )
