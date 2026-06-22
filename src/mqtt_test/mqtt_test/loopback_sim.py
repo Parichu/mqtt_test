@@ -4,7 +4,7 @@ loopback_sim — Gazebo-free robot simulator for Nav2 testing
 Integrates /cmd_vel into a 2-D pose, then publishes:
   - nav_msgs/Odometry  →  /odom
   - TF:  map  → odom          (static identity at startup)
-  - TF:  odom → base_link  (dynamic, updated 50 Hz)
+  - TF:  odom → base_footprint  (dynamic, updated 50 Hz)
 
 No laser scanner is simulated — use sim_params.yaml which strips
 scan layers from costmaps so Nav2 works with static-map only.
@@ -81,11 +81,11 @@ class LoopbackSim(Node):
         qw = math.cos(self._yaw / 2.0)
         stamp = now.to_msg()
 
-        # TF: odom → base_link
+        # TF: odom → base_footprint
         tf = TransformStamped()
         tf.header.stamp = stamp
         tf.header.frame_id = "odom"
-        tf.child_frame_id = "base_link"
+        tf.child_frame_id = "base_footprint"
         tf.transform.translation.x = self._x
         tf.transform.translation.y = self._y
         tf.transform.rotation.z = qz
@@ -96,7 +96,7 @@ class LoopbackSim(Node):
         odom = Odometry()
         odom.header.stamp = stamp
         odom.header.frame_id = "odom"
-        odom.child_frame_id = "base_link"
+        odom.child_frame_id = "base_footprint"
         odom.pose.pose.position.x = self._x
         odom.pose.pose.position.y = self._y
         odom.pose.pose.orientation.z = qz

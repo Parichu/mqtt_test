@@ -66,7 +66,7 @@ def main(args=None):
 
     cap = cv2.VideoCapture(2)
     if not cap.isOpened():
-        node.get_logger().error("Cannot open camera device 0")
+        node.get_logger().error("Cannot open camera device 2")
         node.destroy_node()
         rclpy.shutdown()
         return

@@ -33,6 +33,9 @@ setup(
             "cam_nav = mqtt_test.cam_nav:main",
             "loopback_sim = mqtt_test.loopback_sim:main",
             "click_nav = mqtt_test.click_point:main",
+            "click_uv = mqtt_test.click_point_uv:main",
+            "map_nav = mqtt_test.map_click_nav:main",
+            "map_mqtt = mqtt_test.map_click_mqtt:main",
         ],
     },
 )

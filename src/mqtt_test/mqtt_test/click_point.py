@@ -72,7 +72,7 @@ map_points = np.array(
 )
 
 # ── Set True to recalibrate both image_points and map_points live ─────────────
-CALIBRATE_MODE = True
+CALIBRATE_MODE = False
 
 H, _mask = cv2.findHomography(image_points, map_points)
 

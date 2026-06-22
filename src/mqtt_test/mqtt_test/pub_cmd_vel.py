@@ -2,7 +2,7 @@
 pub_cmd_vel Node — Publishes robot pose telemetry to MQTT broker and ROS /fire/goal_pose topic
 
 Published Topics:
-  /goal_xy  (geometry_msgs/Pose)  — Current XY pose estimate
+  /goal_xy  (std_msgs/String)  — JSON goal: {"x": float, "y": float}
 
 MQTT Published:
   <mqtt_topic>  JSON: {"Position x": float, "Position y": float, "Time Stamped": int}
@@ -24,7 +24,7 @@ import paho.mqtt.client as mqtt
 import rclpy
 from rclpy.node import Node
 
-from geometry_msgs.msg import Pose
+from std_msgs.msg import String
 
 
 class ControlCmd(Node):
@@ -57,10 +57,11 @@ class ControlCmd(Node):
         self._goal_x = self.get_parameter("goal_x").get_parameter_value().double_value
         self._goal_y = self.get_parameter("goal_y").get_parameter_value().double_value
 
-        self._publisher = self.create_publisher(Pose, "goal_xy", 10)
+        self._publisher = self.create_publisher(String, "/goal_xy", 10)
         self._timer = self.create_timer(timer_period, self._timer_callback)
 
         self._time_stamp = 0
+        self._mqtt_connected = False
 
         self._mqtt_client = mqtt.Client()
         self._mqtt_client.username_pw_set(username, password)
@@ -69,6 +70,7 @@ class ControlCmd(Node):
         try:
             self._mqtt_client.connect(broker, port)
             self._mqtt_client.loop_start()
+            self._mqtt_connected = True
             self.get_logger().info(f"Connected to MQTT broker at {broker}:{port}")
         except ConnectionRefusedError:
             self.get_logger().error(
@@ -81,11 +83,10 @@ class ControlCmd(Node):
     def _timer_callback(self):
         self._time_stamp += 1
 
-        # Publish ROS pose
-        pose_msg = Pose()
-        pose_msg.position.x = self._goal_x
-        pose_msg.position.y = self._goal_y
-        self._publisher.publish(pose_msg)
+        # Publish ROS goal (JSON string matching nav.py's expected format)
+        goal_msg = String()
+        goal_msg.data = json.dumps({"x": self._goal_x, "y": self._goal_y})
+        self._publisher.publish(goal_msg)
 
         # Publish MQTT telemetry
         payload = {
@@ -93,10 +94,12 @@ class ControlCmd(Node):
             "Position y": self._goal_y,
             "Time Stamped": self._time_stamp,
         }
-        self._mqtt_client.publish(self._topic, json.dumps(payload))
+        if self._mqtt_connected:
+            self._mqtt_client.publish(self._topic, json.dumps(payload))
         self.get_logger().info(f"Published: {payload}")
 
     def _on_disconnect(self, client, userdata, rc):
+        self._mqtt_connected = False
         if rc != 0:
             self.get_logger().warn(
                 f"Unexpected MQTT disconnect (rc={rc}), attempting reconnect..."
