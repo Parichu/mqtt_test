@@ -36,6 +36,9 @@ setup(
             "click_uv = mqtt_test.click_point_uv:main",
             "map_nav = mqtt_test.map_click_nav:main",
             "map_mqtt = mqtt_test.map_click_mqtt:main",
+            "cam_to_nav = mqtt_test.click_to_goal:main",
+            "cam_map = mqtt_test.cam_to_map:main",
+            "cam_to_nav2 = mqtt_test.click_to_nav_2:main",
         ],
     },
 )

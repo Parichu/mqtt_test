@@ -1,17 +1,20 @@
 """
-map_click_mqtt.py — Map-only click-to-navigate using MQTT for mapuse28
+map_click_mqtt.py — Dual-window click-to-navigate using MQTT for mapuse28
 
-Single window:
-  "Map MQTT - mapuse28" — mapuse28.pgm with overlays:
+Two windows:
+  1. "Map MQTT - mapuse28" — mapuse28.pgm with overlays:
       ● Green circle + arrow  = live robot position (/odom)
       ● Red   circle + cross  = last sent navigation goal
+  2. "Camera MQTT" — live webcam feed with homography-based coordinate
+     transformation from camera pixels to robot map-frame metres.
 
-LEFT CLICK on the map to send a goal_pose via MQTT. The pixel coordinate is
+LEFT CLICK on either window to send a goal_pose via MQTT. Map clicks are
 converted to map-frame metres using the mapuse28.yaml origin and
-resolution, then published as a JSON payload to the MQTT topic.
+resolution. Camera clicks are converted using a pre-calibrated homography.
+Both are published as a JSON payload to the MQTT topic.
 
 Key bindings:
-  Left click — send navigation goal
+  Left click — send navigation goal (map or camera)
   C          — clear goal marker
   Q / Esc    — quit
 """
@@ -22,7 +25,9 @@ import os
 import time
 
 import cv2
+import numpy as np
 import paho.mqtt.client as mqtt
+
 import rclpy
 from ament_index_python.packages import get_package_share_directory
 from nav_msgs.msg import Odometry
@@ -40,6 +45,29 @@ _MAP_IMG = cv2.imread(MAP_IMAGE_PATH, cv2.IMREAD_GRAYSCALE)
 if _MAP_IMG is None:
     raise FileNotFoundError(f"Cannot load map: {MAP_IMAGE_PATH}")
 MAP_H, MAP_W = _MAP_IMG.shape
+
+# ── Webcam-to-Robot homography (Map3 calibration) ────────────────────────────
+CAM_POINTS = np.array(
+    [
+        [1656, 1059],
+        [348, 597],
+        [1008, 101],
+        [1759, 150],
+    ],
+    dtype=np.float32,
+)
+
+WORLD_POINTS = np.array(
+    [
+        [6.180, 1.253],
+        [-44.184, 44.958],
+        [6.638, 1.490],
+        [-3.901, 5.239],
+    ],
+    dtype=np.float32,
+)
+
+H_CAM, _ = cv2.findHomography(CAM_POINTS, WORLD_POINTS, cv2.RANSAC, 5.0)
 
 
 # ── Coordinate helpers ────────────────────────────────────────────────────────
@@ -135,7 +163,7 @@ class MapClickMqttNode(Node):
 
     def send_goal(self, x: float, y: float) -> None:
         """Publish a JSON payload goal via MQTT and ROS 2 topic."""
-        
+
         # ROS 2 Publisher
         xy_msg = String()
         xy_msg.data = json.dumps({"x": x, "y": y})
@@ -174,6 +202,15 @@ def main(args=None):
 
     # ── Shared navigation state ───────────────────────────────────────────────
     goal_map_px = None
+    last_cam_click = None  # (x, y) pixel on the camera frame
+
+    # ── Open webcam ───────────────────────────────────────────────────────────
+    cap = cv2.VideoCapture(0)
+    cam_ok = cap.isOpened()
+    if not cam_ok:
+        node.get_logger().error(
+            "Cannot open webcam (device 2) — continuing with map window only"
+        )
 
     # ── Mouse callback: Map window ────────────────────────────────────────────
     def on_map_mouse(event, col, row, flags, param):
@@ -186,8 +223,31 @@ def main(args=None):
         node.get_logger().info(f"Click ({col},{row}) → map ({x_m:.3f}, {y_m:.3f}) m")
         node.send_goal(x_m, y_m)
 
+    # ── Mouse callback: Camera window ─────────────────────────────────────────
+    def on_cam_mouse(event, x, y, flags, param):
+        nonlocal goal_map_px, last_cam_click
+        if event != cv2.EVENT_LBUTTONDOWN:
+            return
+        if H_CAM is None:
+            node.get_logger().error("Homography not computed")
+            return
+        last_cam_click = (x, y)
+        px = np.array([[[float(x), float(y)]]], dtype=np.float32)
+        world = cv2.perspectiveTransform(px, H_CAM)
+        x_m, y_m = float(world[0][0][0]), float(world[0][0][1])
+        node.get_logger().info(
+            f"Camera click ({x},{y}) → world ({x_m:.3f}, {y_m:.3f}) m"
+        )
+        node.send_goal(x_m, y_m)
+        # Update map marker
+        goal_map_px = map_m_to_px(x_m, y_m)
+
     cv2.namedWindow("Map MQTT - mapuse28")
     cv2.setMouseCallback("Map MQTT - mapuse28", on_map_mouse)
+
+    if cam_ok:
+        cv2.namedWindow("Camera MQTT")
+        cv2.setMouseCallback("Camera MQTT", on_cam_mouse)
 
     while rclpy.ok():
         # ── Draw map with overlays ────────────────────────────────────────────
@@ -206,9 +266,25 @@ def main(args=None):
 
         # MQTT Connection Status
         if node._mqtt_connected:
-            cv2.putText(m, "MQTT: CONNECTED", (10, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 0), 2)
+            cv2.putText(
+                m,
+                "MQTT: CONNECTED",
+                (10, 45),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.55,
+                (0, 255, 0),
+                2,
+            )
         else:
-            cv2.putText(m, "MQTT: DISCONNECTED", (10, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 255), 2)
+            cv2.putText(
+                m,
+                "MQTT: DISCONNECTED",
+                (10, 45),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.55,
+                (0, 0, 255),
+                2,
+            )
 
         # Navigation goal (red circle + cross)
         if goal_map_px:
@@ -254,6 +330,57 @@ def main(args=None):
 
         cv2.imshow("Map MQTT - mapuse28", m)
 
+        # ── Draw camera feed with overlays ────────────────────────────────────
+        if cam_ok:
+            ret, frame = cap.read()
+            if ret:
+                # HUD text
+                cv2.putText(
+                    frame,
+                    "Click camera to navigate | Q = quit",
+                    (10, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 255, 0),
+                    2,
+                )
+
+                # MQTT Connection Status
+                if node._mqtt_connected:
+                    cv2.putText(
+                        frame,
+                        "MQTT: CONNECTED",
+                        (10, 60),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 255, 0),
+                        2,
+                    )
+                else:
+                    cv2.putText(
+                        frame,
+                        "MQTT: DISCONNECTED",
+                        (10, 60),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 0, 255),
+                        2,
+                    )
+
+                # Last clicked position (red circle)
+                if last_cam_click is not None:
+                    cv2.circle(frame, last_cam_click, 10, (0, 0, 255), -1)
+                    cv2.drawMarker(
+                        frame,
+                        last_cam_click,
+                        (0, 0, 255),
+                        cv2.MARKER_CROSS,
+                        24,
+                        2,
+                    )
+
+                cv2.imshow("Camera MQTT", frame)
+
         rclpy.spin_once(node, timeout_sec=0.01)
 
         key = cv2.waitKey(1) & 0xFF
@@ -261,8 +388,11 @@ def main(args=None):
             break
         elif key == ord("c"):
             goal_map_px = None
+            last_cam_click = None
 
     cv2.destroyAllWindows()
+    if cam_ok:
+        cap.release()
     node.destroy_node()
     rclpy.shutdown()
 
