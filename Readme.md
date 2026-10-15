@@ -1,21 +1,42 @@
 # How To Run This Code
-- Step 1 
-  use command 'source install/setup.bash' #Use You Shell Base (zsh or bash)
 
-- Step 2 
-  use command 'ros2 run mqtt_test cam_map' for run caribration program
+### Step 1
+Source the workspace environment (use bash or zsh according to your shell):
+```bash
+source install/setup.bash
+```
 
-- Step 3 
-  After Ui Popup You need to Click 4 Point of Webcam and Robot Map for Click point command press 'c' for change mode to Click Point mode
+### Step 2
+Run the camera-to-map calibration node:
+```bash
+ros2 run mqtt_test cam_map
+```
 
-- Step 4 
-  After Finish pointing press 'h' for Use Homography Matrix Function to transfer surface Webcam and Robot Map become same surface
+### Step 3
+After the UI pops up, select at least 4 corresponding points between the Webcam and the Robot Map:
+- Press **`c`** to enter Click Point mode.
+- Click a point on the **Webcam** window, then click the corresponding point on the **Map (pgm)** window.
+- Repeat for at least 4 points (spread evenly across the room).
 
-- Step 5 
-  From Step 4 After Finish You can Visualize point from two surface it is become a same surface
+### Step 4
+After finishing point selection:
+- Press **`h`** to compute the Homography Matrix that transforms the Webcam surface to the Robot Map coordinate frame.
 
-- Step 6 
-  press 's' for save homography.json file to use this file with yolo model for navigate robot to goal point 
+### Step 5
+Verify the calibration:
+- Press **`v`** to toggle visualization and check that points from both surfaces align properly.
+
+### Step 6
+Save the calibration matrix:
+- Press **`s`** to save the [`homography.json`](homography.json) file.
+- This file is used by the YOLO detection and navigation nodes to steer the robot to goal points.
+
+---
 
 # Demo Video
-<video src="~/ros2_ws/mqtt_test/demo/Cam_Carlibrate.mp4"></video>
+
+[![Watch Calibration Demo Video](demo/thumbnail.jpg)](demo/Cam_Carlibrate.mp4)
+
+> 🎥 **[Click here to open and watch the demo video (`demo/Cam_Carlibrate.mp4`)](demo/Cam_Carlibrate.mp4)**
+
+<video src="demo/Cam_Carlibrate.mp4" controls="controls" width="100%"></video>
