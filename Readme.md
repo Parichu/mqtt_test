@@ -38,5 +38,4 @@ Save the calibration matrix:
 [![Watch Calibration Demo Video](demo/thumbnail.jpg)](demo/Cam_Carlibrate.mp4)
 
 > 🎥 **[Click here to open and watch the demo video (`demo/Cam_Carlibrate.mp4`)](demo/Cam_Carlibrate.mp4)**
-https://github.com/user-attachments/assets/eec792ac-35a9-4fb8-8179-9d85909adc32
-<video src="demo/Cam_Carlibrate.mp4" controls="controls" width="100%"></video>
+<video src=" https://github.com/user-attachments/assets/eec792ac-35a9-4fb8-8179-9d85909adc32" controls="controls" width="100%"></video>
